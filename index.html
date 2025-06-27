@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Image Gallery - Accessible Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #000;
+            color: #fff;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 1000;
+            border-radius: 4px;
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .header::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            background-color: #f5f5f5;
+            min-height: 280px;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .gallery-item:hover,
+        .gallery-item:focus {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            border: none;
+            display: block;
+        }
+
+        .gallery-item:hover img,
+        .gallery-item:focus img {
+            transform: scale(1.05);
+        }
+
+        .car-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+            padding: 30px 20px 20px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover .car-info,
+        .gallery-item:focus .car-info {
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+        }
+
+        .car-name {
+            font-size: clamp(16px, 3vw, 18px);
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .car-description {
+            font-size: clamp(12px, 2.5vw, 14px);
+            opacity: 0.9;
+            line-height: 1.4;
+            color: #fff;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            pointer-events: none;
+        }
+
+        .gallery-item:hover .overlay,
+        .gallery-item:focus .overlay {
+            opacity: 0.8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+            color: #333;
+            padding: 10px;
+        }
+
+        .stat-number {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: clamp(12px, 2.5vw, 14px);
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Enhanced mobile styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+                margin: 0;
+                border-radius: 15px;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .gallery-item {
+                min-height: 250px;
+            }
+
+            .gallery-item img {
+                height: 250px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .car-info {
+                padding: 25px 15px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery-item {
+                min-height: 220px;
+            }
+
+            .gallery-item img {
+                height: 220px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .car-info {
+                padding: 20px 15px 15px;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .container {
+                background: #fff;
+                border: 2px solid #000;
+            }
+
+            .car-info {
+                background: #000;
+            }
+
+            .overlay {
+                background: #000;
+            }
+
+            .gallery-item:hover,
+            .gallery-item:focus {
+                outline: 4px solid #000;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .gallery-item,
+            .gallery-item img,
+            .car-info,
+            .overlay {
+                transition: none;
+            }
+
+            .gallery-item:hover,
+            .gallery-item:focus {
+                transform: none;
+            }
+
+            .gallery-item:hover img,
+            .gallery-item:focus img {
+                transform: none;
+            }
+        }
+
+        /* Touch-friendly styles for mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .gallery-item:hover {
+                transform: none;
+            }
+            
+            .gallery-item:hover img {
+                transform: none;
+            }
+            
+            .gallery-item:hover .overlay {
+                opacity: 0.3;
+            }
+            
+            .car-info {
+                background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            }
+
+            .gallery-item {
+                cursor: default;
+            }
+        }
+
+        /* Improve tap targets for mobile */
+        @media (max-width: 768px) {
+            .gallery-item {
+                min-height: 44px;
+                padding: 0;
+            }
+        }
+
+        /* Better focus handling */
+        .gallery-item:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .gallery-item:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        .gallery-item:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        /* Animation for loading effect */
+        .gallery-item {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gallery-item:nth-child(1) { animation-delay: 0.1s; }
+        .gallery-item:nth-child(2) { animation-delay: 0.2s; }
+        .gallery-item:nth-child(3) { animation-delay: 0.3s; }
+        .gallery-item:nth-child(4) { animation-delay: 0.4s; }
+        .gallery-item:nth-child(5) { animation-delay: 0.5s; }
+        .gallery-item:nth-child(6) { animation-delay: 0.6s; }
+        .gallery-item:nth-child(7) { animation-delay: 0.7s; }
+        .gallery-item:nth-child(8) { animation-delay: 0.8s; }
+
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                background: white;
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            .gallery-item {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            
+            .overlay {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <div class="container">
+        <header class="header">
+            <h1>Car Image Gallery</h1>
+        </header>
+
+        <main id="main-content">
+            <div class="gallery" role="region" aria-label="Car image gallery">
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car1-name" aria-describedby="car1-desc">
+                    <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=280&fit=crop" 
+                         alt="Red luxury sports car with sleek aerodynamic design" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Sports Car</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car1-name">Luxury Sports Car</div>
+                        <div class="car-description" id="car1-desc">High-performance vehicle with sleek design and powerful engine</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car2-name" aria-describedby="car2-desc">
+                    <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=280&fit=crop" 
+                         alt="Classic vintage blue car with chrome details" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Classic Beauty</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car2-name">Vintage Classic</div>
+                        <div class="car-description" id="car2-desc">Timeless design meets modern engineering excellence</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car3-name" aria-describedby="car3-desc">
+                    <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=280&fit=crop" 
+                         alt="White racing car with aerodynamic body on race track" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Race Ready</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car3-name">Racing Machine</div>
+                        <div class="car-description" id="car3-desc">Built for speed with aerodynamic precision and power</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car4-name" aria-describedby="car4-desc">
+                    <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=280&fit=crop" 
+                         alt="Modern compact car in urban city environment" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Urban Style</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car4-name">City Cruiser</div>
+                        <div class="car-description" id="car4-desc">Perfect blend of comfort and performance for city driving</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car5-name" aria-describedby="car5-desc">
+                    <img src="https://images.unsplash.com/photo-1566473965997-3de9c817e938?w=400&h=280&fit=crop" 
+                         alt="Bright yellow exotic supercar with distinctive styling" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Supercar</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car5-name">Exotic Supercar</div>
+                        <div class="car-description" id="car5-desc">Ultimate performance machine with cutting-edge technology</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car6-name" aria-describedby="car6-desc">
+                    <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400&h=280&fit=crop" 
+                         alt="Elegant black luxury sedan with premium features" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Elegant</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car6-name">Luxury Sedan</div>
+                        <div class="car-description" id="car6-desc">Sophisticated design with premium comfort features</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car7-name" aria-describedby="car7-desc">
+                    <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=280&fit=crop" 
+                         alt="High-performance track car with racing modifications" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Performance</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car7-name">Track Beast</div>
+                        <div class="car-description" id="car7-desc">Engineered for maximum performance on track and road</div>
+                    </div>
+                </a>
+
+                <a href="#" class="gallery-item" tabindex="0" aria-labelledby="car8-name" aria-describedby="car8-desc">
+                    <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=280&fit=crop" 
+                         alt="Futuristic concept car with innovative design elements" 
+                         loading="lazy">
+                    <div class="overlay" aria-hidden="true">Modern</div>
+                    <div class="car-info">
+                        <div class="car-name" id="car8-name">Future Vision</div>
+                        <div class="car-description" id="car8-desc">Next-generation design with innovative technology</div>
+                    </div>
+                </a>
+
+
+            </div>
+
+            <section class="stats" aria-labelledby="stats-heading">
+                <h2 id="stats-heading" class="sr-only">Gallery Statistics</h2>
+                <div class="stat-item">
+                    <div class="stat-number" aria-label="8 total cars">8</div>
+                    <div class="stat-label">Total Cars</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" aria-label="5 different brands">5</div>
+                    <div class="stat-label">Brands</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" aria-label="Latest 2024 models">2024</div>
+                    <div class="stat-label">Latest Models</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" aria-label="100 percent premium quality">100%</div>
+                    <div class="stat-label">Premium</div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
